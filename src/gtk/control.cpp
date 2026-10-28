@@ -352,6 +352,7 @@ wxSize wxControl::GTKGetPreferredSize(GtkWidget* widget) const
 
     gtk_widget_set_size_request(widget, -1, -1);
 
+#ifndef __WXGTK4__
     if ( GTK_IS_LABEL(widget) && !gtk_label_get_line_wrap(GTK_LABEL(widget)) )
     {
         // GTK may defer updating the Pango font after SetFont(), so its
@@ -364,10 +365,15 @@ wxSize wxControl::GTKGetPreferredSize(GtkWidget* widget) const
         const PangoFontDescription* const currentFont =
             pango_context_get_font_description(gtk_widget_get_pango_context(widget));
         if ( font && currentFont && !pango_font_description_equal(font, currentFont) )
+        {
+            wxGCC_WARNING_SUPPRESS(deprecated-declarations)
             gtk_style_context_invalidate(context);
+            wxGCC_WARNING_RESTORE()
+        }
         if ( font )
             pango_font_description_free(font);
     }
+#endif // !__WXGTK4__
 
     gtk_widget_get_preferred_size(widget, NULL, &req);
     gtk_widget_set_size_request(widget, w, h);
