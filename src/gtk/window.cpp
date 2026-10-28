@@ -4377,6 +4377,71 @@ double wxWindowGTK::GetDPIScaleFactor() const
     return GetContentScaleFactor();
 }
 
+#ifdef __WXGTK3__
+
+// ----------------------------------------------------------------------------
+// DPI-independent pixels
+// ----------------------------------------------------------------------------
+
+// Point-sized GTK fonts follow the screen font resolution even when the
+// integer window scale is unchanged. Match DIP geometry to that resolution.
+namespace
+{
+
+double wxGTKDIPScale(const wxWindowBase* window)
+{
+    GtkWidget* const widget = window ? GTK_WIDGET(window->GetHandle()) : NULL;
+    GdkScreen* const screen = widget ? gtk_widget_get_screen(widget)
+                                    : gdk_screen_get_default();
+    if ( !screen )
+        return 1;
+
+    // Ensure GTK has applied the current font resolution. Do not cache it:
+    // settings changes and windows on another screen must use their own DPI.
+    gtk_settings_get_for_screen(screen);
+    const double dpi = gdk_screen_get_resolution(screen);
+    return dpi > 0 && wxFinite(dpi) ? dpi / 96 : 1;
+}
+
+int wxGTKScaleCoord(int value, double scale)
+{
+    // -1 means "unspecified" and 0 has no size to scale.
+    if ( value == -1 || value == 0 )
+        return value;
+
+    int scaled = wxRound(value * scale);
+    if ( value > 0 && scaled < 1 )
+        scaled = 1;
+    else if ( value < -1 && scaled > -2 )
+        scaled = -2;
+    return scaled;
+}
+
+} // anonymous namespace
+
+/* static */
+wxSize
+wxWindowBase::FromDIP(const wxSize& sz, const wxWindowBase* w)
+{
+    const double scale = wxGTKDIPScale(w);
+    if ( scale == 1 )
+        return sz;
+    return wxSize(wxGTKScaleCoord(sz.x, scale), wxGTKScaleCoord(sz.y, scale));
+}
+
+/* static */
+wxSize
+wxWindowBase::ToDIP(const wxSize& sz, const wxWindowBase* w)
+{
+    const double scale = wxGTKDIPScale(w);
+    if ( scale == 1 )
+        return sz;
+    return wxSize(wxGTKScaleCoord(sz.x, 1 / scale),
+                  wxGTKScaleCoord(sz.y, 1 / scale));
+}
+
+#endif // __WXGTK3__
+
 void wxWindowGTK::GTKDisableFocusOutEvent()
 {
     g_signal_handlers_block_by_func( m_focusWidget,
