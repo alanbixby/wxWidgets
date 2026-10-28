@@ -37,7 +37,6 @@
 #endif
 
 #include <ctype.h>
-#include <cmath>
 
 #include "wx/gtk/private.h"
 #include "wx/gtk/private/gtk3-compat.h"
@@ -4401,7 +4400,7 @@ double wxGTKDIPScale(const wxWindowBase* window)
     // settings changes and windows on another screen must use their own DPI.
     gtk_settings_get_for_screen(screen);
     const double dpi = gdk_screen_get_resolution(screen);
-    return dpi > 0 && std::isfinite(dpi) ? dpi / 96 : 1;
+    return dpi > 0 && wxFinite(dpi) ? dpi / 96 : 1;
 }
 
 int wxGTKScaleCoord(int value, double scale)
