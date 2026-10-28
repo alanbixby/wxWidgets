@@ -4396,8 +4396,8 @@ double wxGTKDIPScale(const wxWindowBase* window)
     if ( !screen )
         return 1;
 
-    // Ensure GTK has applied the current font resolution. Do not cache it:
-    // settings changes and windows on another screen must use their own DPI.
+    // Creating the screen settings applies Xft.dpi/XSETTINGS to its resolution.
+    // Read it each time so settings changes and other screens use their own DPI.
     gtk_settings_get_for_screen(screen);
     const double dpi = gdk_screen_get_resolution(screen);
     return dpi > 0 && wxFinite(dpi) ? dpi / 96 : 1;
@@ -4409,9 +4409,16 @@ int wxGTKScaleCoord(int value, double scale)
     if ( value == -1 || value == 0 )
         return value;
 
-    int scaled = wxRound(value * scale);
+    const double product = value * scale;
+    if ( product >= INT_MAX )
+        return INT_MAX;
+    if ( product <= INT_MIN )
+        return INT_MIN;
+
+    int scaled = wxRound(product);
     if ( value > 0 && scaled < 1 )
         scaled = 1;
+    // Keep other negative coordinates from becoming the unspecified sentinel.
     else if ( value < -1 && scaled > -2 )
         scaled = -2;
     return scaled;
