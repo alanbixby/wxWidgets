@@ -2074,10 +2074,11 @@ inline wxWindow *wxWindowBase::GetGrandParent() const
     return m_parent ? m_parent->GetParent() : NULL;
 }
 
-#ifdef wxHAVE_DPI_INDEPENDENT_PIXELS
+#if defined(wxHAVE_DPI_INDEPENDENT_PIXELS) && !defined(__WXGTK3__)
 
 // FromDIP() and ToDIP() become trivial in this case, so make them inline to
-// avoid any overhead.
+// avoid any overhead. wxGTK3 defines them out of line in src/gtk/window.cpp
+// because its font resolution can differ from its integer window scale.
 
 /* static */
 inline wxSize
@@ -2093,7 +2094,7 @@ wxWindowBase::ToDIP(const wxSize& sz, const wxWindowBase* WXUNUSED(w))
     return sz;
 }
 
-#endif // wxHAVE_DPI_INDEPENDENT_PIXELS
+#endif // wxHAVE_DPI_INDEPENDENT_PIXELS && !__WXGTK3__
 
 // ----------------------------------------------------------------------------
 // global functions
