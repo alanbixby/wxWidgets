@@ -1074,6 +1074,13 @@ public:
         @endcode
         to avoid using tiny bitmaps on high DPI screens.
 
+        In this wxGTK3 fork, the conversion follows the GTK screen font
+        resolution only when the wxSystemOptions option
+        @c gtk.window.font-dpi-scaling is set to 1 (default: 0).
+        GetDPIScaleFactor() and GetContentScaleFactor() still report the
+        integer window scale, so fractional font DPI can make them differ
+        from the scale used here.
+
         Notice that this function is only needed when using hard coded pixel
         values. It is not necessary if the sizes are already based on the
         DPI-independent units such as dialog units or if you are relying on the

@@ -88,6 +88,10 @@
     @flag{gtk.desktop}
         This option can be set to override the default desktop environment
         determination. Supported values are GNOME and KDE.
+    @flag{gtk.window.font-dpi-scaling}
+        GTK3 only. If 1, wxWindow::FromDIP() and wxWindow::ToDIP() follow
+        the screen font resolution. Default: 0 (identity conversions).
+        Set before creating windows and do not change it afterwards.
     @flag{gtk.window.force-background-colour}
         If 1, the backgrounds of windows with the wxBG_STYLE_COLOUR background
         style are cleared forcibly instead of relying on the underlying GTK+
